@@ -202,7 +202,7 @@ router.post("/speech-to-text", upload.single("audio"), async (req, res) => {
 // =========================
 router.post("/chat", async (req, res) => {
   try {
-    const { message, language = "en", userId } = req.body;
+    const { message, language, userId } = req.body;
 
     if (!message) return res.status(400).json({ error: "Message is required" });
     if (!userId) return res.status(400).json({ error: "UserId is required" });

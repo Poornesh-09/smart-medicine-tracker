@@ -483,6 +483,7 @@ const medicineRoutes = require('./routes/medicines');
 const llmRoutes = require('./routes/llm');
 const medicinesRoutes = require('./routes/llm'); // or wherever your router is
 
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -514,7 +515,8 @@ const ReportSchema = new mongoose.Schema({
           use: String,
           cost: String,
           how_to_use: String,
-          side_effects: String
+          side_effects: String,
+          
         }
       ]
     }
@@ -542,7 +544,12 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
           {
             role: "system",
             content:
+            `
               "You are a medical prescription parser. Always return JSON with fields: medications (array of {name, dose, frequency, duration, instructions}) and condition (string)."
+              - "frequency" = how often (e.g. "once", "daily", "weekly")
+              `
+              
+              
           },
           {
             role: "user",
@@ -996,6 +1003,14 @@ and return details in structured JSON with fields:
   "side_effects": "string"
 }
 
+Guidelines:
+
+- Each field should be a full descriptive sentence or multiple sentences.
+- The "uses" field should explain all common indications in 2–4 sentences.
+  Example: "This medicine is commonly used to relieve headache, reduce fever, and ease body pain. It can also be helpful in minor inflammations. Avoid taking it on an empty stomach."
+- The "side_effects" field should list common side effects in 2–4 sentences.
+  Example: "Some people may experience nausea, dizziness, or mild stomach upset. Rarely, allergic reactions can occur. Always follow dosage instructions to minimize risks."
+- The "cost" field should be in Indian Rupees, phrased naturally, e.g., "The approximate cost of this medicine in India is ₹250."
 If unclear, guess the closest possible medicine but keep the JSON format.
 `
         },
@@ -1073,6 +1088,43 @@ app.use('/api/llm', llmRoutes);
 app.use('/api/medicines', medicinesRoutes);
 const chatRoutes = require("./routes/botRoutes");
 app.use("/api", chatRoutes);
+
+const trustedRoutes = require("./routes/trustedRoutes");
+app.use("/api/trusted",trustedRoutes);
+
+const reminderRoutes = require('./routes/reminderRoutes');
+app.use('/api', reminderRoutes);
+
+const { checkMissedMedicines } = require("./scheduler/reminderScheduler");
+console.log("🟢 Scheduler started, will check missed medicines every 1 min");
+
+// Run immediately once for testing
+checkMissedMedicines().catch(err => console.error("Scheduler initial run error:", err));
+
+// Then run every 1 minute
+setInterval(() => {
+  checkMissedMedicines().catch(err => console.error("Scheduler run error:", err));
+}, 60 * 1000);
+const medicineStatusRoutes = require("./routes/medicineStatus");
+app.use("/api/medicine-status", medicineStatusRoutes);
+
+// Cron Jobs (⚡ important)
+require("./jobs/medicineScheduler");
+
+const notificationRoutes = require("./routes/notificationRoutes");
+app.use("/api/notifications", notificationRoutes);
+
+// const medStatusRoutes = require('./routes/medicineStatus');
+// app.use('/api/medicine-status', medStatusRoutes);
+
+
+
+
+// app.use("/api/trusted", require("./routes/trustedRoutes"));
+
+const profileRoutes = require("./routes/profileRoutes");
+app.use("/api/profile", profileRoutes);
+
 
 
 

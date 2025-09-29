@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const doseSchema = new mongoose.Schema({
   time24: String,             // "09:00"
-  beforeAfterMeal: { type:String, default: 'any' }  // before|after|any
+  beforeAfterMeal: { type:String, default: 'any' },  // before|after|any
+  notified: { type: Boolean, default: false }
 });
 
 const medicineSchema = new mongoose.Schema({
@@ -10,12 +11,14 @@ const medicineSchema = new mongoose.Schema({
   name: { type: String, required: true },
   strength: String,
   dosage: { type: String},   // "1 tablet"
-  frequency: { type: String, default: 'daily' },
+  frequency: { type: String},
   daysOfWeek: [String],
   startDate: Date,
   endDate: Date,
   doses: [doseSchema],
-  notes: String
+  notes: String,
+  color: { type: String},
+  shape: { type: String},
 }, { timestamps: true });
 
 const prescriptionSchema = new mongoose.Schema({

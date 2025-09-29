@@ -216,6 +216,24 @@ router.post('/reminder-text', auth, async (req, res) => {
   }
 });
 
+// POST /api/notify-trusted
+// router.post('/notify-trusted', auth, async (req, res) => {
+//   try {
+//     const { userId, medicineName, doseTime } = req.body;
+//     const members = await TrustedMember.find({ userId }).limit(3);
+
+//     members.forEach(member => {
+//       sendNotificationToTrusted(member.memberId, `${medicineName} was not taken at ${doseTime}`);
+//     });
+
+//     res.json({ success: true });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'Failed to notify trusted members' });
+//   }
+// });
+
+
 // NEW: check pending medicines today
 router.get('/pending', auth, async (req, res) => {
   try {
